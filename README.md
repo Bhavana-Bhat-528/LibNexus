@@ -236,4 +236,4 @@ spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
 
 On initial startup, `DataInitializer` automatically seeds:
 - 9 catalog books across multiple subjects (Computer Science, Programming, Artificial Intelligence, Networking, Database Systems).
-- 3 sample student records with mock borrowing transactions to demonstrate active loans and overdue fine calculations.
+- 3 sample student records with mock borrowing transactions to demonstrate active borrowed books and overdue fine calculations.
