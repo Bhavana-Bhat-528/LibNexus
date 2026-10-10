@@ -239,4 +239,4 @@ On initial startup, `DataInitializer` automatically seeds:
 - 3 sample student records with mock borrowing transactions to demonstrate active borrowed books and overdue fine calculations.
 
 ## Note:
-This project is still being developed
+This project is still being developed.
