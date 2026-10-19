@@ -25,6 +25,7 @@ public class Book {
     @Column(name = "available_copies", nullable = false)
     private Integer availableCopies;
 
+
     public Book() {
     }
 

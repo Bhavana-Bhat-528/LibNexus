@@ -281,4 +281,87 @@ public class TransactionService {
 
         return stats;
     }
+
+    public Transaction getTransactionById(Long id) {
+        if (id == null) {
+            throw new BadRequestException("Transaction ID cannot be null");
+        }
+        return transactionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Transaction not found with ID: " + id));
+    }
+
+    public Map<String, Object> getPenaltiesReport() {
+        Double finesSum = transactionRepository.sumTotalFines();
+        double totalCollected = finesSum != null ? finesSum : 0.0;
+
+        List<Transaction> penaltyTransactions = transactionRepository.findCollectedPenalties();
+        int penaltyCount = penaltyTransactions.size();
+
+        // Calculate active accruing fines
+        List<Transaction> activeTransactions = transactionRepository.findByStatusOrderByIssueDateDescIdDesc(TransactionStatus.BORROWED);
+        LocalDate today = LocalDate.now();
+        double activeAccruingFines = 0.0;
+        long overdueCount = 0;
+
+        for (Transaction t : activeTransactions) {
+            long days = ChronoUnit.DAYS.between(t.getIssueDate(), today);
+            if (days > 15) {
+                overdueCount++;
+                activeAccruingFines += (days - 15) * 2.0;
+            }
+        }
+
+        // Format collected penalties list
+        List<Map<String, Object>> collectedList = new ArrayList<>();
+        Map<String, Map<String, Object>> studentAggregates = new LinkedHashMap<>();
+
+        for (Transaction t : penaltyTransactions) {
+            long days = ChronoUnit.DAYS.between(t.getIssueDate(), t.getReturnDate() != null ? t.getReturnDate() : today);
+            long daysOverdue = Math.max(0, days - 15);
+
+            Map<String, Object> item = new LinkedHashMap<>();
+            item.put("transactionId", t.getId());
+            item.put("studentId", t.getStudent().getId());
+            item.put("studentName", t.getStudent().getName());
+            item.put("studentUsn", t.getStudent().getUsn());
+            item.put("studentContact", t.getStudent().getContact());
+            item.put("bookId", t.getBook().getId());
+            item.put("bookTitle", t.getBook().getTitle());
+            item.put("bookAuthor", t.getBook().getAuthor());
+            item.put("bookCategory", t.getBook().getCategory());
+            item.put("issueDate", t.getIssueDate().toString());
+            item.put("returnDate", t.getReturnDate() != null ? t.getReturnDate().toString() : "-");
+            item.put("daysBorrowed", days);
+            item.put("daysOverdue", daysOverdue);
+            item.put("fine", t.getFine());
+            collectedList.add(item);
+
+            // Group by student USN
+            String usnKey = t.getStudent().getUsn();
+            Map<String, Object> studentAgg = studentAggregates.computeIfAbsent(usnKey, k -> {
+                Map<String, Object> s = new LinkedHashMap<>();
+                s.put("usn", t.getStudent().getUsn());
+                s.put("name", t.getStudent().getName());
+                s.put("contact", t.getStudent().getContact());
+                s.put("totalFine", 0.0);
+                s.put("penaltyCount", 0);
+                return s;
+            });
+            studentAgg.put("totalFine", (Double) studentAgg.get("totalFine") + (t.getFine() != null ? t.getFine() : 0.0));
+            studentAgg.put("penaltyCount", (Integer) studentAgg.get("penaltyCount") + 1);
+        }
+
+        List<Map<String, Object>> studentSummaryList = new ArrayList<>(studentAggregates.values());
+        studentSummaryList.sort((a, b) -> Double.compare((Double) b.get("totalFine"), (Double) a.get("totalFine")));
+
+        Map<String, Object> report = new LinkedHashMap<>();
+        report.put("totalCollectedFines", totalCollected);
+        report.put("totalFineTransactionsCount", penaltyCount);
+        report.put("activeAccruingFines", activeAccruingFines);
+        report.put("overdueTransactionsCount", overdueCount);
+        report.put("collectedPenalties", collectedList);
+        report.put("studentSummary", studentSummaryList);
+
+        return report;
+    }
 }

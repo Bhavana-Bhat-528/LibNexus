@@ -2,18 +2,22 @@ package com.librarymanagement.controller;
 
 import com.librarymanagement.dto.ApiResponse;
 import com.librarymanagement.dto.StudentDto;
+import com.librarymanagement.dto.StudentRegistrationRequest;
 import com.librarymanagement.entity.Student;
 import com.librarymanagement.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/students")
 @CrossOrigin(origins = "*")
+@PreAuthorize("hasRole('LIBRARIAN')")
 public class StudentController {
 
     private final StudentService studentService;
@@ -47,16 +51,26 @@ public class StudentController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<StudentDto>> addStudent(@RequestBody Student student) {
-        StudentDto created = studentService.addStudent(student);
+    public ResponseEntity<ApiResponse<StudentDto>> addStudent(@RequestBody StudentRegistrationRequest request) {
+        StudentDto created = studentService.registerStudent(request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Student added successfully", created));
+                .body(ApiResponse.success("Student registered successfully with login credentials", created));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<StudentDto>> updateStudent(@PathVariable Long id, @RequestBody Student student) {
         StudentDto updated = studentService.updateStudent(id, student);
         return ResponseEntity.ok(ApiResponse.success("Student updated successfully", updated));
+    }
+
+    @PutMapping("/{id}/credentials")
+    public ResponseEntity<ApiResponse<StudentDto>> updateCredentials(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body) {
+        String username = body.get("username");
+        String password = body.get("password");
+        StudentDto updated = studentService.updateStudentCredentials(id, username, password);
+        return ResponseEntity.ok(ApiResponse.success("Student login credentials updated successfully", updated));
     }
 
     @DeleteMapping("/{id}")

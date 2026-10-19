@@ -1,14 +1,13 @@
 package com.librarymanagement.config;
 
-import com.librarymanagement.entity.Book;
-import com.librarymanagement.entity.Student;
-import com.librarymanagement.entity.Transaction;
-import com.librarymanagement.entity.TransactionStatus;
+import com.librarymanagement.entity.*;
 import com.librarymanagement.repository.BookRepository;
 import com.librarymanagement.repository.StudentRepository;
 import com.librarymanagement.repository.TransactionRepository;
+import com.librarymanagement.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -20,20 +19,27 @@ public class DataInitializer implements CommandLineRunner {
     private final BookRepository bookRepository;
     private final StudentRepository studentRepository;
     private final TransactionRepository transactionRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public DataInitializer(BookRepository bookRepository,
                            StudentRepository studentRepository,
-                           TransactionRepository transactionRepository) {
+                           TransactionRepository transactionRepository,
+                           UserRepository userRepository,
+                           PasswordEncoder passwordEncoder) {
         this.bookRepository = bookRepository;
         this.studentRepository = studentRepository;
         this.transactionRepository = transactionRepository;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public void run(String... args) throws Exception {
         initializeBooks();
         initializeSampleStudentsAndTransactions();
+        initializeUsers();
     }
 
     private void initializeBooks() {
@@ -63,9 +69,10 @@ public class DataInitializer implements CommandLineRunner {
 
             System.out.println(">>> SAMPLE STUDENTS CREATED <<<");
 
-            // Create a few initial transaction records for demonstration
+            // Create sample initial transactions for demonstration
             Book b1 = bookRepository.findByTitleIgnoreCase("Java Programming").orElse(null);
             Book b2 = bookRepository.findByTitleIgnoreCase("Data Structures").orElse(null);
+            Book b3 = bookRepository.findByTitleIgnoreCase("Web Development").orElse(null);
 
             if (b1 != null && b1.getAvailableCopies() > 0) {
                 b1.setAvailableCopies(b1.getAvailableCopies() - 1);
@@ -81,6 +88,49 @@ public class DataInitializer implements CommandLineRunner {
 
                 Transaction t2 = new Transaction(s2, b2, LocalDate.now().minusDays(20), TransactionStatus.BORROWED);
                 transactionRepository.save(t2);
+            }
+
+            // Create a sample returned transaction with collected late fine (7 days overdue = ₹14.00)
+            if (b3 != null) {
+                Transaction t3 = new Transaction(s1, b3, LocalDate.now().minusDays(25), TransactionStatus.RETURNED);
+                t3.setReturnDate(LocalDate.now().minusDays(3));
+                t3.setFine(14.0);
+                transactionRepository.save(t3);
+            }
+        }
+    }
+
+    private void initializeUsers() {
+        // 1. Seed Librarian Account if not present
+        if (!userRepository.existsByUsernameIgnoreCase("librarian")) {
+            User librarian = new User(
+                    "librarian",
+                    passwordEncoder.encode("librarian123"),
+                    Role.ROLE_LIBRARIAN
+            );
+            userRepository.save(librarian);
+            System.out.println(">>> LIBRARIAN ACCOUNT CREATED: 'librarian' / 'librarian123' <<<");
+        }
+
+        // 2. Ensure every student has an associated user account
+        List<Student> students = studentRepository.findAll();
+        for (Student s : students) {
+            if (s.getUsn() != null && userRepository.findByStudentUsnIgnoreCase(s.getUsn()).isEmpty()) {
+                String candidateUsername;
+                if (s.getName() != null && !s.getName().trim().isEmpty()) {
+                    candidateUsername = s.getName().trim().split("\\s+")[0].toLowerCase();
+                } else {
+                    candidateUsername = s.getUsn().trim().toLowerCase();
+                }
+                if (userRepository.existsByUsernameIgnoreCase(candidateUsername)) {
+                    candidateUsername = s.getUsn().trim().toLowerCase();
+                }
+                if (userRepository.existsByUsernameIgnoreCase(candidateUsername)) {
+                    candidateUsername = s.getUsn().trim().toLowerCase() + "_" + (s.getId() != null ? s.getId() : System.currentTimeMillis());
+                }
+                User studentUser = new User(candidateUsername, passwordEncoder.encode("student123"), Role.ROLE_STUDENT, s);
+                userRepository.save(studentUser);
+                System.out.println(">>> SEEDED STUDENT USER: " + candidateUsername + " (USN: " + s.getUsn() + ") <<<");
             }
         }
     }

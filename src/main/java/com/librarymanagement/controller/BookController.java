@@ -6,6 +6,7 @@ import com.librarymanagement.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -64,12 +65,14 @@ public class BookController {
     }
 
     @GetMapping("/categories")
+    @PreAuthorize("hasAnyRole('LIBRARIAN', 'STUDENT')")
     public ResponseEntity<ApiResponse<List<String>>> getCategories() {
         List<String> categories = bookService.getAllCategories();
         return ResponseEntity.ok(ApiResponse.success("Categories retrieved", categories));
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('LIBRARIAN')")
     public ResponseEntity<ApiResponse<Book>> addBook(@RequestBody Book book) {
         Book created = bookService.addBook(book);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -77,12 +80,14 @@ public class BookController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('LIBRARIAN')")
     public ResponseEntity<ApiResponse<Book>> updateBook(@PathVariable Long id, @RequestBody Book book) {
         Book updated = bookService.updateBook(id, book);
         return ResponseEntity.ok(ApiResponse.success("Book updated successfully", updated));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('LIBRARIAN')")
     public ResponseEntity<ApiResponse<Void>> deleteBook(@PathVariable Long id) {
         bookService.deleteBook(id);
         return ResponseEntity.ok(ApiResponse.success("Book deleted successfully"));

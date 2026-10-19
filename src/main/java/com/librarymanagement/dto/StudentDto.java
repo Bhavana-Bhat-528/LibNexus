@@ -9,6 +9,8 @@ public class StudentDto {
     private String contact;
     private int activeBooksCount;
     private int remainingBorrowLimit;
+    private String username;
+    private boolean hasLoginAccount;
 
     public StudentDto() {
     }
@@ -68,5 +70,21 @@ public class StudentDto {
 
     public void setRemainingBorrowLimit(int remainingBorrowLimit) {
         this.remainingBorrowLimit = remainingBorrowLimit;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public boolean isHasLoginAccount() {
+        return hasLoginAccount;
+    }
+
+    public void setHasLoginAccount(boolean hasLoginAccount) {
+        this.hasLoginAccount = hasLoginAccount;
     }
 }

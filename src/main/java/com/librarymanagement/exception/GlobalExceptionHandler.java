@@ -35,9 +35,23 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(errorMessage != null ? errorMessage : "Validation failed"));
     }
 
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Object>> handleAccessDenied(org.springframework.security.access.AccessDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleGeneralException(Exception ex) {
+        ex.printStackTrace();
+        String msg = ex.getMessage();
+        if (ex.getCause() != null) {
+            msg += " -> " + ex.getCause().getMessage();
+            if (ex.getCause().getCause() != null) {
+                msg += " -> " + ex.getCause().getCause().getMessage();
+            }
+        }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("An unexpected error occurred: " + ex.getMessage()));
+                .body(ApiResponse.error("An unexpected error occurred: " + msg));
     }
 }

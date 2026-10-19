@@ -36,6 +36,11 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     @Query("SELECT SUM(t.fine) FROM Transaction t WHERE t.status = 'RETURNED'")
     Double sumTotalFines();
 
+    @Query("SELECT t FROM Transaction t WHERE t.status = 'RETURNED' AND t.fine > 0 ORDER BY t.returnDate DESC, t.id DESC")
+    List<Transaction> findCollectedPenalties();
+
+    int countByStatusAndFineGreaterThan(TransactionStatus status, Double fine);
+
     @Query("SELECT t FROM Transaction t WHERE " +
            "(:usn IS NULL OR LOWER(t.student.usn) LIKE LOWER(CONCAT('%', :usn, '%'))) AND " +
            "(:status IS NULL OR t.status = :status) AND " +

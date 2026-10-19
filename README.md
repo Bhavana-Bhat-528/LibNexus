@@ -1,71 +1,150 @@
-# Library Management System
+# LibNexus — Modern Library Management System
 
 ![Java](https://img.shields.io/badge/Java-17+-ED8B00?style=flat-square&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.3.3-6DB33F?style=flat-square&logo=spring-boot&logoColor=white)
-![Spring Data JPA](https://img.shields.io/badge/Spring_Data_JPA-Hibernate-59666C?style=flat-square&logo=hibernate&logoColor=white)
-![MySQL](https://img.shields.io/badge/MySQL-8.0+-4479A1?style=flat-square&logo=mysql&logoColor=white)
-![Apache Maven](https://img.shields.io/badge/Apache_Maven-3.8+-C71A36?style=flat-square&logo=apache-maven&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
+![Spring Security](https://img.shields.io/badge/Spring_Security-6.3-6DB33F?style=flat-square&logo=springsecurity&logoColor=white)
+![JJWT](https://img.shields.io/badge/JJWT-0.12.6-000000?style=flat-square&logo=jsonwebtokens&logoColor=white)
+![React](https://img.shields.io/badge/React-18.3-61DAFB?style=flat-square&logo=react&logoColor=black)
+![Vite](https://img.shields.io/badge/Vite-6.0-646CFF?style=flat-square&logo=vite&logoColor=white)
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3.3-7952B3?style=flat-square&logo=bootstrap&logoColor=white)
-![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white)
-![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-8.0+-4479A1?style=flat-square&logo=mysql&logoColor=white)
+![Maven](https://img.shields.io/badge/Apache_Maven-3.8+-C71A36?style=flat-square&logo=apache-maven&logoColor=white)
 
-A full-stack Library Management System built with Spring Boot, Spring Data JPA, MySQL, and a responsive Bootstrap single-page interface. The application handles catalog inventory, student records, book borrowing and return workflows, automated late fine calculations, and circulation reporting.
+**LibNexus** is an enterprise-grade, modern Library Management System engineered with **Spring Boot 3**, **Spring Security (stateless JWT + BCrypt)**, **Spring Data JPA**, **MySQL**, and a responsive **React + Vite** single-page application.
 
----
-
-## Key Features
-
-- **Dashboard & Analytics**: Real-time summary of total books, available inventory, registered students, active loans, returned records, overdue loans, and total collected fines.
-- **Book Catalog Management**: Full CRUD operations for books with category categorization, total stock tracking, and automated stock status (`AVAILABLE`, `LOW_STOCK`, `OUT_OF_STOCK`).
-- **Student Directory**: Student registration with unique University Seat Number (USN) validation, contact management, and active borrow count tracking.
-- **Book Circulation (Issue / Return)**:
-  - Multi-book issue support (up to 3 books per request).
-  - Validation to ensure students cannot borrow duplicate copies of an unreturned book.
-  - Return processing by Transaction ID, student USN, or book title/ID.
-- **Automated Fine Calculation**:
-  - Standard loan period: 15 days.
-  - Overdue fine rate: ₹2.00 per day past the due date.
-- **Circulation History & Auditing**:
-  - Filterable transaction logs by USN, status (`BORROWED` or `RETURNED`), and search queries.
-  - Dedicated student history view showing current loans and past returns with fine records.
+The platform provides complete role-based workflows for both **Librarians** and **Students**, enforcing strict security boundaries, student data privacy, inventory concurrency controls, automated overdue fine accounting, and comprehensive circulation management.
 
 ---
 
-## Business Rules
+## Architecture Overview
 
-1. **Borrowing Limit**: A student can hold a maximum of 3 actively borrowed books at any given time.
-2. **Duplicate Prevention**: A student cannot borrow a second copy of a book they currently have checked out.
-3. **Inventory Validation**: Books can only be issued if `availableCopies > 0`. Stock counts are atomically updated on issue and return.
-4. **Loan Duration & Fines**:
-   - Issue duration: 15 days.
-   - For returns beyond 15 days: $\text{Fine} = (\text{Days Borrowed} - 15) \times 2.00$.
+```mermaid
+graph TD
+    subgraph Frontend ["Frontend (React 18 + Vite)"]
+        UI[React SPA / React Router]
+        AuthCtx[Auth Context & JWT Store]
+        AxiosClient[Axios Client with Bearer Interceptor]
+        UI --> AuthCtx
+        UI --> AxiosClient
+    end
+
+    subgraph Security ["Spring Security 6.3"]
+        JWTFilter[AuthTokenFilter]
+        AuthMgr[AuthenticationManager & BCrypt]
+        SecCtx[SecurityContext & Method Security @PreAuthorize]
+        AxiosClient -->|HTTPS Bearer Token| JWTFilter
+        JWTFilter --> AuthMgr
+        JWTFilter --> SecCtx
+    end
+
+    subgraph Backend ["Spring Boot REST API"]
+        AuthController[AuthController]
+        BookController[BookController]
+        StudentController[StudentController]
+        StudentPortalController[StudentPortalController]
+        TxController[TransactionController]
+        DashController[DashboardController]
+        
+        SecCtx --> AuthController
+        SecCtx --> BookController
+        SecCtx --> StudentController
+        SecCtx --> StudentPortalController
+        SecCtx --> TxController
+        SecCtx --> DashController
+    end
+
+    subgraph ServiceLayer ["Service Layer & Business Rules"]
+        BookSvc[BookService]
+        StudentSvc[StudentService]
+        TxSvc[TransactionService]
+        
+        BookController --> BookSvc
+        StudentController --> StudentSvc
+        StudentPortalController --> TxSvc
+        TxController --> TxSvc
+        DashController --> TxSvc
+    end
+
+    subgraph Persistence ["Persistence Layer (Spring Data JPA + Hibernate)"]
+        BookRepo[BookRepository]
+        StudentRepo[StudentRepository]
+        TxRepo[TransactionRepository]
+        UserRepo[UserRepository]
+        
+        BookSvc --> BookRepo
+        StudentSvc --> StudentRepo
+        TxSvc --> TxRepo
+        TxSvc --> BookRepo
+        TxSvc --> StudentRepo
+    end
+
+    subgraph Database ["MySQL 8.0+ Database"]
+        MySQL[(LibraryDB)]
+        BookRepo --> MySQL
+        StudentRepo --> MySQL
+        TxRepo --> MySQL
+        UserRepo --> MySQL
+    end
+```
+
+---
+
+## Role-Based Access Control (RBAC)
+
+The system enforces strict distinction between **Librarians** and **Students**:
+
+| Capability / Module | Librarian (`ROLE_LIBRARIAN`) | Student (`ROLE_STUDENT`) | Unauthenticated |
+|---|:---:|:---:|:---:|
+| **Login / Authentication** | Full access | Full access | Allowed |
+| **Client SPA Assets** | Full access | Full access | Allowed |
+| **Catalog Browsing & Search** | Full access | Full access | Forbidden |
+| **Book Inventory CRUD** | Create, Update, Delete | Read-Only | Forbidden |
+| **Student Directory CRUD** | Create, Update, Delete | Forbidden (403) | Forbidden |
+| **Circulation Issue / Borrow** | Full access | Forbidden (403) | Forbidden |
+| **Circulation Return & Settle** | Full access | Forbidden (403) | Forbidden |
+| **Audit Logs & All Transactions** | Full access | Forbidden (403) | Forbidden |
+| **System Dashboard & Analytics** | Full access | Forbidden (403) | Forbidden |
+| **Personal Student Portal** | Forbidden (403) | Personal Data Only | Forbidden |
+| **Student Isolation Guarantee** | Access any USN | Isolated to Own USN | Forbidden |
+
+### Student Data Privacy Guarantee
+- Students can **only** inspect their own active checkouts, return history, and profile.
+- Access to `/api/transactions/student/{usn}` strictly validates that the requesting token's authenticated student USN matches the targeted USN (`@PreAuthorize("hasRole('LIBRARIAN') or (hasRole('STUDENT') and principal.usn == #usn)")`).
+- Any attempt by a student to request another student's record triggers a `403 Forbidden` JSON error response.
+
+---
+
+## Core Business Rules
+
+1. **Borrowing Quota**: A student cannot borrow more than **3 books** concurrently.
+2. **Duplicate Check**: A student cannot borrow a second copy of an unreturned book they currently hold.
+3. **Atomic Stock & Inventory Integrity**:
+   - Books can only be issued if `availableCopies > 0`.
+   - Inventory is protected with JPA optimistic locking (`@Version private Long version;`) on `Book` entity to prevent race conditions during concurrent checkouts.
+4. **Loan Term & Automated Fine Calculation**:
+   - Standard borrowing term: **15 days**.
+   - Overdue fine rate: **₹2.00 per day** past due date:
+     $$\text{Fine} = (\text{Days Borrowed} - 15) \times ₹2.00$$
 
 ---
 
 ## Technology Stack
 
-### Backend & Database
-![Java](https://img.shields.io/badge/Java-17+-ED8B00?style=flat-square&logo=openjdk&logoColor=white)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.3.3-6DB33F?style=flat-square&logo=spring-boot&logoColor=white)
-![Spring Data JPA](https://img.shields.io/badge/Spring_Data_JPA-Hibernate-59666C?style=flat-square&logo=hibernate&logoColor=white)
-![MySQL](https://img.shields.io/badge/MySQL-8.0+-4479A1?style=flat-square&logo=mysql&logoColor=white)
-![Apache Maven](https://img.shields.io/badge/Apache_Maven-3.8+-C71A36?style=flat-square&logo=apache-maven&logoColor=white)
-
-- **Language**: Java 17+
-- **Framework**: Spring Boot 3.3.3 (Spring MVC, Spring Data JPA)
-- **ORM / Persistence**: Hibernate, Spring Data JPA
-- **Database**: MySQL 8.0+
-- **Build Tool**: Apache Maven
+### Backend
+- **Java 17+** (tested and compatible up to OpenJDK 24)
+- **Spring Boot 3.3.3**
+- **Spring Security 6.3** (stateless JWT authentication with BCrypt hashing)
+- **JJWT 0.12.6** (`jjwt-api`, `jjwt-impl`, `jjwt-jackson`)
+- **Spring Data JPA & Hibernate 6.5**
+- **MySQL 8.0+**
+- **Maven 3.8+**
 
 ### Frontend
-![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white)
-![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
-![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3.3-7952B3?style=flat-square&logo=bootstrap&logoColor=white)
-
-- **Structure & Styling**: HTML5, CSS3, Bootstrap 5.3.3, Bootstrap Icons
-- **Client Logic**: Vanilla JavaScript (ES6 Fetch API)
+- **React 18.3**
+- **Vite 6.0** (fast modern bundling, HMR, proxy configuration)
+- **React Router DOM 6** (client-side routing and protected routes)
+- **Bootstrap 5.3.3 & Bootstrap Icons 1.11**
+- **Axios 1.7** (HTTP client with request interceptors for Bearer token injection and response interceptors for 401 handling)
 
 ---
 
@@ -73,170 +152,255 @@ A full-stack Library Management System built with Spring Boot, Spring Data JPA, 
 
 ```text
 Library-Management-System/
+├── frontend/                               # React + Vite Single-Page Application
+│   ├── src/
+│   │   ├── components/                     # Reusable UI widgets (StatCard, StockBadge, Modals)
+│   │   ├── context/                        # AuthContext (JWT session state, login/logout)
+│   │   ├── layouts/                        # Role-specific layouts (LibrarianLayout, StudentLayout)
+│   │   ├── pages/                          # Application pages
+│   │   │   ├── Login.jsx                   # Modern sign-in with instant demo credentials
+│   │   │   ├── librarian/                  # Dashboard, Books, Students, Borrow, Return, Transactions
+│   │   │   └── student/                    # Dashboard, Books Catalog, MyBooks, History, Profile
+│   │   ├── routes/                         # ProtectedRoute component (RBAC guard)
+│   │   ├── services/                       # Axios instance with interceptors (api.js)
+│   │   ├── App.jsx                         # Main Router configuration
+│   │   ├── index.css                       # Modern custom design system tokens & styles
+│   │   └── main.jsx                        # React root entry
+│   ├── package.json
+│   └── vite.config.js                      # Configured to build directly into Spring Boot static resources
 ├── src/
 │   ├── main/
 │   │   ├── java/com/librarymanagement/
-│   │   │   ├── LibraryManagementApplication.java
 │   │   │   ├── config/
-│   │   │   │   └── DataInitializer.java
+│   │   │   │   └── DataInitializer.java    # Seeds demo books, students, and BCrypt accounts
 │   │   │   ├── controller/
-│   │   │   │   ├── BookController.java
-│   │   │   │   ├── DashboardController.java
-│   │   │   │   ├── StudentController.java
-│   │   │   │   └── TransactionController.java
-│   │   │   ├── dto/
-│   │   │   │   ├── ApiResponse.java
-│   │   │   │   ├── BorrowRequest.java
-│   │   │   │   ├── DashboardStatsDto.java
-│   │   │   │   ├── ReturnRequest.java
-│   │   │   │   └── StudentDto.java
-│   │   │   ├── entity/
-│   │   │   │   ├── Book.java
-│   │   │   │   ├── Student.java
-│   │   │   │   ├── Transaction.java
-│   │   │   │   └── TransactionStatus.java
-│   │   │   ├── exception/
-│   │   │   │   ├── BadRequestException.java
-│   │   │   │   ├── GlobalExceptionHandler.java
-│   │   │   │   └── ResourceNotFoundException.java
-│   │   │   ├── repository/
-│   │   │   │   ├── BookRepository.java
-│   │   │   │   ├── StudentRepository.java
-│   │   │   │   └── TransactionRepository.java
-│   │   │   └── service/
-│   │   │       ├── BookService.java
-│   │   │       ├── StudentService.java
-│   │   │       └── TransactionService.java
+│   │   │   │   ├── AuthController.java     # /api/auth/login and /api/auth/me
+│   │   │   │   ├── BookController.java     # Book catalog CRUD & availability
+│   │   │   │   ├── DashboardController.java# Aggregate metrics & KPIs
+│   │   │   │   ├── SpaController.java      # HTML5 history forwarding to /index.html
+│   │   │   │   ├── StudentController.java  # Student registry management
+│   │   │   │   ├── StudentPortalController.java # Student self-service endpoints
+│   │   │   │   └── TransactionController.java   # Borrow, return, and audit logs
+│   │   │   ├── dto/                        # Request and Response transfer objects
+│   │   │   ├── entity/                     # JPA Entities (Book, Student, Transaction, User, Role)
+│   │   │   ├── exception/                  # GlobalExceptionHandler, Custom exceptions
+│   │   │   ├── repository/                 # Spring Data JPA Repositories
+│   │   │   ├── security/                   # Spring Security, JWT utilities, filters, and handlers
+│   │   │   └── service/                    # Transactional business logic
 │   │   └── resources/
-│   │       ├── application.properties
-│   │       └── static/
-│   │           ├── index.html
-│   │           ├── css/
-│   │           │   └── style.css
-│   │           └── js/
-│   │               ├── app.js
-│   │               ├── books.js
-│   │               ├── students.js
-│   │               └── transactions.js
-└── pom.xml
+│   │       ├── application.properties      # Database & JWT properties (with env var overrides)
+│   │       └── static/                     # Compiled React SPA production bundle
+│   └── test/
+│       ├── java/com/librarymanagement/
+│       │   ├── controller/AuthControllerTest.java
+│       │   ├── security/SecurityAccessTest.java
+│       │   └── service/
+│       │       ├── BookServiceTest.java
+│       │       └── TransactionServiceTest.java
+│       └── resources/mockito-extensions/
+├── pom.xml                                 # Maven dependencies and surefire configuration
+└── README.md
 ```
 
 ---
 
 ## Database Configuration
 
-The application uses Spring Data JPA with MySQL. Configure database connection properties in `src/main/resources/application.properties`:
+Configure your database connection in `src/main/resources/application.properties`:
 
 ```properties
 server.port=8080
 
 spring.datasource.url=jdbc:mysql://localhost:3306/LibraryDB?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-spring.datasource.username=root
-spring.datasource.password=YOUR_MYSQL_PASSWORD
+spring.datasource.username=${DB_USERNAME:root}
+spring.datasource.password=${DB_PASSWORD:password}
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=false
-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
+spring.jpa.open-in-view=false
+
+# JWT Secret & Expiration (24 hours)
+app.jwt.secret=${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+app.jwt.expiration-ms=${JWT_EXPIRATION_MS:86400000}
 ```
 
-### Entity Relationships
-
-- **Student** (1) ───< (Many) **Transaction**
-- **Book** (1) ───< (Many) **Transaction**
+> **Note**: Database schema updates are handled automatically with `hibernate.ddl-auto=update`. Existing catalog and loan data are preserved.
 
 ---
 
 ## REST API Specification
 
-### Dashboard
+### 1. Authentication (`/api/auth`)
+
+| Method | Endpoint | Description | Auth Required |
+|---|---|---|:---:|
+| `POST` | `/api/auth/login` | Authenticate with username and password, returns JWT and user role | None |
+| `GET` | `/api/auth/me` | Fetch profile and USN of currently authenticated token | Any Authenticated |
+
+#### Sample Login Request
+```json
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "username": "librarian",
+  "password": "librarian123"
+}
+```
+
+#### Sample Login Response
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiJ9...",
+  "type": "Bearer",
+  "id": 1,
+  "username": "librarian",
+  "role": "ROLE_LIBRARIAN",
+  "studentId": null,
+  "studentName": null,
+  "studentUsn": null
+}
+```
+
+---
+
+### 2. Student Portal (`/api/student-portal`)
+
+Strictly accessible by authenticated students (`ROLE_STUDENT`):
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/api/dashboard/stats` | Retrieve aggregate metrics, counts, and recent transactions |
-
-### Books
-
-| Method | Endpoint | Description | Query / Body Parameters |
-|---|---|---|---|
-| `GET` | `/api/books` | List all books | `search` (optional), `category` (optional) |
-| `GET` | `/api/books/{id}` | Get book details by ID | — |
-| `GET` | `/api/books/search` | Search books by title | `title` (required) |
-| `GET` | `/api/books/{id}/availability` | Check book availability status | — |
-| `POST` | `/api/books` | Create a new book | JSON object (`title`, `author`, `category`, `totalCopies`) |
-| `PUT` | `/api/books/{id}` | Update existing book details | JSON object (`title`, `author`, `category`, `totalCopies`, `availableCopies`) |
-| `DELETE` | `/api/books/{id}` | Remove book from inventory | — |
-
-### Students
-
-| Method | Endpoint | Description | Query / Body Parameters |
-|---|---|---|---|
-| `GET` | `/api/students` | List all students | `search` (optional) |
-| `GET` | `/api/students/{id}` | Get student details by ID | — |
-| `GET` | `/api/students/usn/{usn}` | Get student by USN | — |
-| `POST` | `/api/students` | Register a new student | JSON object (`name`, `usn`, `contact`) |
-| `PUT` | `/api/students/{id}` | Update student details | JSON object (`name`, `usn`, `contact`) |
-| `DELETE` | `/api/students/{id}` | Delete student record | — |
-
-### Transactions
-
-| Method | Endpoint | Description | Request Body |
-|---|---|---|---|
-| `POST` | `/api/transactions/borrow` | Issue one or more books | `{"usn": "...", "bookIds": [1, 2]}` or `{"usn": "...", "bookTitles": ["..."]}` |
-| `POST` | `/api/transactions/return` | Return an issued book | `{"transactionId": 1}` or `{"usn": "...", "bookId": 1}` |
-| `GET` | `/api/transactions` | Query transactions with filters | `usn`, `status` (`BORROWED`/`RETURNED`), `search` (all optional) |
-| `GET` | `/api/transactions/student/{usn}` | Retrieve transaction history for a specific USN | — |
+| `GET` | `/api/student-portal/dashboard` | Returns student summary, active book count, remaining quota, and fine alerts |
+| `GET` | `/api/student-portal/my-books` | Returns currently borrowed books with due dates and live accrued fines |
+| `GET` | `/api/student-portal/history` | Returns historical returned loans and settled fines |
+| `GET` | `/api/student-portal/profile` | Returns student identity, registered USN, and contact info |
 
 ---
 
-## Setup and Installation
+### 3. Book Management (`/api/books`)
+
+| Method | Endpoint | Description | Access Control |
+|---|---|---|:---:|
+| `GET` | `/api/books` | List books (supports `search` and `category` filters) | Librarian & Student |
+| `GET` | `/api/books/{id}` | Get book details by ID | Librarian & Student |
+| `GET` | `/api/books/{id}/availability` | Check current inventory and availability | Librarian & Student |
+| `POST` | `/api/books` | Add a new book to the catalog | Librarian Only |
+| `PUT` | `/api/books/{id}` | Update existing book information | Librarian Only |
+| `DELETE` | `/api/books/{id}` | Remove a book from the catalog | Librarian Only |
+
+---
+
+### 4. Student Registry (`/api/students`)
+
+| Method | Endpoint | Description | Access Control |
+|---|---|---|:---:|
+| `GET` | `/api/students` | List all registered students (supports `search` filter) | Librarian Only |
+| `GET` | `/api/students/{id}` | Get student by ID | Librarian Only |
+| `GET` | `/api/students/usn/{usn}` | Get student by USN | Librarian Only |
+| `POST` | `/api/students` | Register a new student | Librarian Only |
+| `PUT` | `/api/students/{id}` | Update student contact information | Librarian Only |
+| `DELETE` | `/api/students/{id}` | Remove student record | Librarian Only |
+
+---
+
+### 5. Circulation & Transactions (`/api/transactions`)
+
+| Method | Endpoint | Description | Access Control |
+|---|---|---|:---:|
+| `POST` | `/api/transactions/borrow` | Issue books to a student by USN and Book ID(s) | Librarian Only |
+| `POST` | `/api/transactions/return` | Process return by transaction ID or USN & Book ID | Librarian Only |
+| `GET` | `/api/transactions` | Query circulation log (`status`, `usn`, `search`) | Librarian Only |
+| `GET` | `/api/transactions/student/{usn}` | Retrieve circulation records for a specific USN | Librarian or Matching Student |
+
+---
+
+### 6. Analytics & Dashboard (`/api/dashboard`)
+
+| Method | Endpoint | Description | Access Control |
+|---|---|---|:---:|
+| `GET` | `/api/dashboard/stats` | System aggregate metrics, circulation counts, and recent activity | Librarian Only |
+
+---
+
+## Seeded Test Accounts
+
+The application automatically seeds demonstration accounts upon first run in `DataInitializer`:
+
+| Role | Username | Password | Linked USN | Description |
+|---|---|---|---|---|
+| **Librarian** | `librarian` | `librarian123` | *N/A* | Head Librarian with complete administrative privileges |
+| **Student** | `rahul` | `student123` | `1MS21CS001` | Student with active loan (overdue demo loan with fine) |
+| **Student** | `ananya` | `student123` | `1MS21CS002` | Student with active loan within due date |
+| **Student** | `vikram` | `student123` | `1MS21CS003` | Student with clean loan history |
+
+---
+
+## Getting Started
 
 ### Prerequisites
-
 - **Java Development Kit (JDK)**: Version 17 or higher
-- **Apache Maven**: Version 3.8 or higher
+- **Node.js**: Version 18 or higher & `npm`
 - **MySQL Server**: Version 8.0 or higher
+- **Apache Maven**: Version 3.8 or higher
 
-### Installation Steps
+### 1. Database Setup
+Ensure your MySQL server is running, and create the database:
+```sql
+CREATE DATABASE IF NOT EXISTS LibraryDB;
+```
 
-1. **Clone or Navigate to the Repository**:
-   ```bash
-   git clone <repository-url>
-   cd Library-Management-System
-   ```
+### 2. Run in Development Mode
 
-2. **Create MySQL Database**:
-   Log in to MySQL and create the database schema:
-   ```sql
-   CREATE DATABASE IF NOT EXISTS LibraryDB;
-   ```
+#### Terminal 1 — Start Backend Server:
+```bash
+# In project root:
+mvn spring-boot:run
+```
+The backend starts at `http://localhost:8080`.
 
-3. **Update Application Properties**:
-   Open `src/main/resources/application.properties` and set your MySQL credentials:
-   ```properties
-   spring.datasource.username=your_mysql_user
-   spring.datasource.password=your_mysql_password
-   ```
-
-4. **Build and Run the Application**:
-   Using Maven wrapper or standard Maven:
-   ```bash
-   mvn clean spring-boot:run
-   ```
-
-5. **Access the Application**:
-   Once the server starts, open your web browser and go to:
-   ```text
-   http://localhost:8080/
-   ```
+#### Terminal 2 — Start Frontend React Server:
+```bash
+# In frontend directory:
+cd frontend
+npm install
+npm run dev
+```
+The Vite development server will start at `http://localhost:5173`. API calls are automatically proxied to `http://localhost:8080`.
 
 ---
 
-## Sample Data
+### 3. Run in Production Mode (Single-JAR Deployment)
 
-On initial startup, `DataInitializer` automatically seeds:
-- 9 catalog books across multiple subjects (Computer Science, Programming, Artificial Intelligence, Networking, Database Systems).
-- 3 sample student records with mock borrowing transactions to demonstrate active borrowed books and overdue fine calculations.
+The frontend is configured to build directly into Spring Boot's `src/main/resources/static` directory. This allows running the entire application as a single self-contained executable jar:
 
-## Note:
-This project is still being developed.
+```bash
+# 1. Build the React frontend production bundle:
+cd frontend
+npm run build
+cd ..
+
+# 2. Package and run the Spring Boot application:
+mvn clean package -DskipTests
+java -jar target/library-management-system-0.0.1-SNAPSHOT.jar
+```
+Now access the full application directly at:
+```text
+http://localhost:8080
+```
+
+---
+
+## Automated Test Suite
+
+The project includes unit and integration tests covering business rules, optimistic concurrency, and Spring Security authorization:
+
+```bash
+mvn test
+```
+
+### Test Coverage Highlights:
+- **`TransactionServiceTest`**: Validates borrowing quota (3-book limit), duplicate unreturned loan rejection, stock decrement, 15-day return processing, and overdue fine calculations.
+- **`BookServiceTest`**: Validates book creation, duplicate title constraints, availability checking, and stock status categorization.
+- **`AuthControllerTest`**: Validates JWT authentication and invalid credential rejections.
+- **`SecurityAccessTest`**: Verifies role-based endpoint protection (students blocked from librarian routes, student data isolation across USNs, and public SPA routing).
