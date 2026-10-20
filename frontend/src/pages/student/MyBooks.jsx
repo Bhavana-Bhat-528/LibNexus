@@ -91,7 +91,7 @@ export const StudentMyBooks = () => {
 
       {/* Information Banner */}
       <div className="alert alert-info border-0 rounded-4 shadow-sm mb-4 d-flex align-items-center gap-3">
-        <div className="p-2 bg-info bg-opacity-20 text-info rounded-circle fs-4">
+        <div className="p-2 bg-info bg-opacity-10 text-info rounded-circle fs-4">
           <i className="bi bi-clock-history"></i>
         </div>
         <div>

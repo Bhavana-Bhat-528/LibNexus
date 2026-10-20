@@ -72,7 +72,7 @@ export const StudentLayout = () => {
         {/* Sidebar Navigation */}
         <aside className="app-sidebar py-3 d-flex flex-column justify-content-between">
           <div>
-            <div className="px-4 mb-3 text-uppercase fs-8 fw-bold text-muted" style={{ letterSpacing: '0.08em' }}>
+            <div className="px-4 mb-3 text-uppercase fs-8 fw-bold" style={{ letterSpacing: '0.08em', color: '#ffffff' }}>
               Student Services
             </div>
             <ul className="nav flex-column sidebar-nav list-unstyled">
@@ -136,7 +136,7 @@ export const StudentLayout = () => {
         </aside>
 
         {/* Content Area */}
-        <main className="flex-grow-1 p-4 bg-light overflow-auto">
+        <main className="flex-grow-1 p-4 bg-light overflow-auto" style={{ minWidth: 0 }}>
           {alertError && (
             <div className="alert alert-warning alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
               <i className="bi bi-exclamation-triangle-fill me-2"></i> {alertError}
