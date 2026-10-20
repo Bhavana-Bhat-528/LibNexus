@@ -18,32 +18,36 @@ The platform provides complete role-based workflows for both **Librarians** and 
 
 ## 📸 Application Screenshots & UI Showcase
 
-> 💡 **Adding Your Screenshots:** Save your screen captures in the [`docs/screenshots/`](docs/screenshots/) directory matching the filenames below. The markdown embeds below are already linked and will display them automatically!
-
 ### 🧑‍💼 Librarian Administration Suite
 
 #### 1. Librarian Overview & Analytics Dashboard
-*Real-time KPI metrics, circulation audit stream, and library inventory distribution.*
+
+_Real-time KPI metrics, circulation audit stream, and library inventory distribution._
 ![Librarian Overview Dashboard](docs/screenshots/librarian_dashboard.png)
 
 #### 2. Penalty Fees Collection Ledger
-*Audit record of realized overdue fine revenue, transaction incident breakdowns, live filter tabs, and CSV ledger export.*
+
+_Audit record of realized overdue fine revenue, transaction incident breakdowns, live filter tabs, and CSV ledger export._
 ![Penalty Fees Collection Ledger](docs/screenshots/penalties_ledger.png)
 
 #### 3. Register Student & Account Creation
-*Instant student enrollment, auto-generated secure passwords, credential clipboard copy, and comprehensive student account policy reference.*
+
+_Instant student enrollment, auto-generated secure passwords, credential clipboard copy, and comprehensive student account policy reference._
 ![Register Student & Give Password](docs/screenshots/register_student.png)
 
 #### 4. Student Credentials & Passwords Registry
-*Librarian master directory of student usernames, USNs, and one-click password reset facility.*
+
+_Librarian master directory of student usernames, USNs, and one-click password reset facility._
 ![Student Credentials & Passwords](docs/screenshots/student_credentials.png)
 
 #### 5. Books Catalog & Inventory Stock Control
-*Searchable book collection, stock status badges (In Stock, Low Stock, Out of Stock), and book creation/edit modals.*
+
+_Searchable book collection, stock status badges (In Stock, Low Stock, Out of Stock), and book creation/edit modals._
 ![Books Catalog & Stock](docs/screenshots/books_catalog.png)
 
 #### 6. Circulation Transaction Audits
-*Complete chronological audit log of all book issues, returns, active loans, and settled late fees.*
+
+_Complete chronological audit log of all book issues, returns, active loans, and settled late fees._
 ![Transaction Audits](docs/screenshots/circulation_audits.png)
 
 ---
@@ -51,19 +55,23 @@ The platform provides complete role-based workflows for both **Librarians** and 
 ### 🎓 Student Self-Service Portal
 
 #### 1. Student Overview & Quota Dashboard
-*Personal borrowing quota counter (3-book limit), active loans summary, and quick access navigation cards.*
+
+_Personal borrowing quota counter (3-book limit), active loans summary, and quick access navigation cards._
 ![Student Dashboard](docs/screenshots/student_dashboard.png)
 
 #### 2. Browse Catalog & Instant Book Borrowing
-*Interactive book catalog displaying real-time availability with single-click book issue.*
+
+_Interactive book catalog displaying real-time availability with single-click book issue._
 ![Student Borrow Book](docs/screenshots/student_borrow.png)
 
 #### 3. My Borrowed Books & Due Date Countdown
-*Active loan monitoring with loan duration countdowns, live overdue fine accrued counters, and return check-in.*
+
+_Active loan monitoring with loan duration countdowns, live overdue fine accrued counters, and return check-in._
 ![My Borrowed Books](docs/screenshots/student_my_books.png)
 
 #### 4. Penalty Fees & Transaction History
-*Transparent breakdown of paid and accruing late return fees with full borrowing history logs.*
+
+_Transparent breakdown of paid and accruing late return fees with full borrowing history logs._
 ![Student Penalty Statement](docs/screenshots/student_penalties.png)
 
 ---
@@ -71,7 +79,8 @@ The platform provides complete role-based workflows for both **Librarians** and 
 ### 🔐 Authentication & Access Control
 
 #### Split-Screen Sign In & Student Self-Registration
-*Stateless JWT login with role detection, new student self-registration modal, and instant one-click demo credentials.*
+
+_Stateless JWT login with role detection, new student self-registration modal, and instant one-click demo credentials._
 ![Login & Portal Authentication](docs/screenshots/login_screen.png)
 
 ---
@@ -104,7 +113,7 @@ graph TD
         StudentPortalController[StudentPortalController]
         TxController[TransactionController]
         DashController[DashboardController]
-        
+
         SecCtx --> AuthController
         SecCtx --> BookController
         SecCtx --> StudentController
@@ -117,7 +126,7 @@ graph TD
         BookSvc[BookService]
         StudentSvc[StudentService]
         TxSvc[TransactionService]
-        
+
         BookController --> BookSvc
         StudentController --> StudentSvc
         StudentPortalController --> TxSvc
@@ -130,7 +139,7 @@ graph TD
         StudentRepo[StudentRepository]
         TxRepo[TransactionRepository]
         UserRepo[UserRepository]
-        
+
         BookSvc --> BookRepo
         StudentSvc --> StudentRepo
         TxSvc --> TxRepo
@@ -153,21 +162,22 @@ graph TD
 
 The system enforces strict distinction between **Librarians** and **Students**:
 
-| Capability / Module | Librarian (`ROLE_LIBRARIAN`) | Student (`ROLE_STUDENT`) | Unauthenticated |
-|---|:---:|:---:|:---:|
-| **Login / Authentication** | Full access | Full access | Allowed |
-| **Client SPA Assets** | Full access | Full access | Allowed |
-| **Catalog Browsing & Search** | Full access | Full access | Forbidden |
-| **Book Inventory CRUD** | Create, Update, Delete | Read-Only | Forbidden |
-| **Student Directory CRUD** | Create, Update, Delete | Forbidden (403) | Forbidden |
-| **Circulation Issue / Borrow** | Full access | Forbidden (403) | Forbidden |
-| **Circulation Return & Settle** | Full access | Forbidden (403) | Forbidden |
-| **Audit Logs & All Transactions** | Full access | Forbidden (403) | Forbidden |
-| **System Dashboard & Analytics** | Full access | Forbidden (403) | Forbidden |
-| **Personal Student Portal** | Forbidden (403) | Personal Data Only | Forbidden |
-| **Student Isolation Guarantee** | Access any USN | Isolated to Own USN | Forbidden |
+| Capability / Module               | Librarian (`ROLE_LIBRARIAN`) | Student (`ROLE_STUDENT`) | Unauthenticated |
+| --------------------------------- | :--------------------------: | :----------------------: | :-------------: |
+| **Login / Authentication**        |         Full access          |       Full access        |     Allowed     |
+| **Client SPA Assets**             |         Full access          |       Full access        |     Allowed     |
+| **Catalog Browsing & Search**     |         Full access          |       Full access        |    Forbidden    |
+| **Book Inventory CRUD**           |    Create, Update, Delete    |        Read-Only         |    Forbidden    |
+| **Student Directory CRUD**        |    Create, Update, Delete    |     Forbidden (403)      |    Forbidden    |
+| **Circulation Issue / Borrow**    |         Full access          |     Forbidden (403)      |    Forbidden    |
+| **Circulation Return & Settle**   |         Full access          |     Forbidden (403)      |    Forbidden    |
+| **Audit Logs & All Transactions** |         Full access          |     Forbidden (403)      |    Forbidden    |
+| **System Dashboard & Analytics**  |         Full access          |     Forbidden (403)      |    Forbidden    |
+| **Personal Student Portal**       |       Forbidden (403)        |    Personal Data Only    |    Forbidden    |
+| **Student Isolation Guarantee**   |        Access any USN        |   Isolated to Own USN    |    Forbidden    |
 
 ### Student Data Privacy Guarantee
+
 - Students can **only** inspect their own active checkouts, return history, and profile.
 - Access to `/api/transactions/student/{usn}` strictly validates that the requesting token's authenticated student USN matches the targeted USN (`@PreAuthorize("hasRole('LIBRARIAN') or (hasRole('STUDENT') and principal.usn == #usn)")`).
 - Any attempt by a student to request another student's record triggers a `403 Forbidden` JSON error response.
@@ -191,6 +201,7 @@ The system enforces strict distinction between **Librarians** and **Students**:
 ## Technology Stack
 
 ### Backend
+
 - **Java 17+** (tested and compatible up to OpenJDK 24)
 - **Spring Boot 3.3.3**
 - **Spring Security 6.3** (stateless JWT authentication with BCrypt hashing)
@@ -200,6 +211,7 @@ The system enforces strict distinction between **Librarians** and **Students**:
 - **Maven 3.8+**
 
 ### Frontend
+
 - **React 18.3**
 - **Vite 6.0** (fast modern bundling, HMR, proxy configuration)
 - **React Router DOM 6** (client-side routing and protected routes)
@@ -293,12 +305,13 @@ app.jwt.expiration-ms=${JWT_EXPIRATION_MS:86400000}
 
 ### 1. Authentication (`/api/auth`)
 
-| Method | Endpoint | Description | Auth Required |
-|---|---|---|:---:|
-| `POST` | `/api/auth/login` | Authenticate with username and password, returns JWT and user role | None |
-| `GET` | `/api/auth/me` | Fetch profile and USN of currently authenticated token | Any Authenticated |
+| Method | Endpoint          | Description                                                        |   Auth Required   |
+| ------ | ----------------- | ------------------------------------------------------------------ | :---------------: |
+| `POST` | `/api/auth/login` | Authenticate with username and password, returns JWT and user role |       None        |
+| `GET`  | `/api/auth/me`    | Fetch profile and USN of currently authenticated token             | Any Authenticated |
 
 #### Sample Login Request
+
 ```json
 POST /api/auth/login
 Content-Type: application/json
@@ -310,6 +323,7 @@ Content-Type: application/json
 ```
 
 #### Sample Login Response
+
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiJ9...",
@@ -329,57 +343,57 @@ Content-Type: application/json
 
 Strictly accessible by authenticated students (`ROLE_STUDENT`):
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/student-portal/dashboard` | Returns student summary, active book count, remaining quota, and fine alerts |
-| `GET` | `/api/student-portal/my-books` | Returns currently borrowed books with due dates and live accrued fines |
-| `GET` | `/api/student-portal/history` | Returns historical returned loans and settled fines |
-| `GET` | `/api/student-portal/profile` | Returns student identity, registered USN, and contact info |
+| Method | Endpoint                        | Description                                                                  |
+| ------ | ------------------------------- | ---------------------------------------------------------------------------- |
+| `GET`  | `/api/student-portal/dashboard` | Returns student summary, active book count, remaining quota, and fine alerts |
+| `GET`  | `/api/student-portal/my-books`  | Returns currently borrowed books with due dates and live accrued fines       |
+| `GET`  | `/api/student-portal/history`   | Returns historical returned loans and settled fines                          |
+| `GET`  | `/api/student-portal/profile`   | Returns student identity, registered USN, and contact info                   |
 
 ---
 
 ### 3. Book Management (`/api/books`)
 
-| Method | Endpoint | Description | Access Control |
-|---|---|---|:---:|
-| `GET` | `/api/books` | List books (supports `search` and `category` filters) | Librarian & Student |
-| `GET` | `/api/books/{id}` | Get book details by ID | Librarian & Student |
-| `GET` | `/api/books/{id}/availability` | Check current inventory and availability | Librarian & Student |
-| `POST` | `/api/books` | Add a new book to the catalog | Librarian Only |
-| `PUT` | `/api/books/{id}` | Update existing book information | Librarian Only |
-| `DELETE` | `/api/books/{id}` | Remove a book from the catalog | Librarian Only |
+| Method   | Endpoint                       | Description                                           |   Access Control    |
+| -------- | ------------------------------ | ----------------------------------------------------- | :-----------------: |
+| `GET`    | `/api/books`                   | List books (supports `search` and `category` filters) | Librarian & Student |
+| `GET`    | `/api/books/{id}`              | Get book details by ID                                | Librarian & Student |
+| `GET`    | `/api/books/{id}/availability` | Check current inventory and availability              | Librarian & Student |
+| `POST`   | `/api/books`                   | Add a new book to the catalog                         |   Librarian Only    |
+| `PUT`    | `/api/books/{id}`              | Update existing book information                      |   Librarian Only    |
+| `DELETE` | `/api/books/{id}`              | Remove a book from the catalog                        |   Librarian Only    |
 
 ---
 
 ### 4. Student Registry (`/api/students`)
 
-| Method | Endpoint | Description | Access Control |
-|---|---|---|:---:|
-| `GET` | `/api/students` | List all registered students (supports `search` filter) | Librarian Only |
-| `GET` | `/api/students/{id}` | Get student by ID | Librarian Only |
-| `GET` | `/api/students/usn/{usn}` | Get student by USN | Librarian Only |
-| `POST` | `/api/students` | Register a new student | Librarian Only |
-| `PUT` | `/api/students/{id}` | Update student contact information | Librarian Only |
-| `DELETE` | `/api/students/{id}` | Remove student record | Librarian Only |
+| Method   | Endpoint                  | Description                                             | Access Control |
+| -------- | ------------------------- | ------------------------------------------------------- | :------------: |
+| `GET`    | `/api/students`           | List all registered students (supports `search` filter) | Librarian Only |
+| `GET`    | `/api/students/{id}`      | Get student by ID                                       | Librarian Only |
+| `GET`    | `/api/students/usn/{usn}` | Get student by USN                                      | Librarian Only |
+| `POST`   | `/api/students`           | Register a new student                                  | Librarian Only |
+| `PUT`    | `/api/students/{id}`      | Update student contact information                      | Librarian Only |
+| `DELETE` | `/api/students/{id}`      | Remove student record                                   | Librarian Only |
 
 ---
 
 ### 5. Circulation & Transactions (`/api/transactions`)
 
-| Method | Endpoint | Description | Access Control |
-|---|---|---|:---:|
-| `POST` | `/api/transactions/borrow` | Issue books to a student by USN and Book ID(s) | Librarian Only |
-| `POST` | `/api/transactions/return` | Process return by transaction ID or USN & Book ID | Librarian Only |
-| `GET` | `/api/transactions` | Query circulation log (`status`, `usn`, `search`) | Librarian Only |
-| `GET` | `/api/transactions/student/{usn}` | Retrieve circulation records for a specific USN | Librarian or Matching Student |
+| Method | Endpoint                          | Description                                       |        Access Control         |
+| ------ | --------------------------------- | ------------------------------------------------- | :---------------------------: |
+| `POST` | `/api/transactions/borrow`        | Issue books to a student by USN and Book ID(s)    |        Librarian Only         |
+| `POST` | `/api/transactions/return`        | Process return by transaction ID or USN & Book ID |        Librarian Only         |
+| `GET`  | `/api/transactions`               | Query circulation log (`status`, `usn`, `search`) |        Librarian Only         |
+| `GET`  | `/api/transactions/student/{usn}` | Retrieve circulation records for a specific USN   | Librarian or Matching Student |
 
 ---
 
 ### 6. Analytics & Dashboard (`/api/dashboard`)
 
-| Method | Endpoint | Description | Access Control |
-|---|---|---|:---:|
-| `GET` | `/api/dashboard/stats` | System aggregate metrics, circulation counts, and recent activity | Librarian Only |
+| Method | Endpoint               | Description                                                       | Access Control |
+| ------ | ---------------------- | ----------------------------------------------------------------- | :------------: |
+| `GET`  | `/api/dashboard/stats` | System aggregate metrics, circulation counts, and recent activity | Librarian Only |
 
 ---
 
@@ -387,25 +401,28 @@ Strictly accessible by authenticated students (`ROLE_STUDENT`):
 
 The application automatically seeds demonstration accounts upon first run in `DataInitializer`:
 
-| Role | Username | Password | Linked USN | Description |
-|---|---|---|---|---|
-| **Librarian** | `librarian` | `librarian123` | *N/A* | Head Librarian with complete administrative privileges |
-| **Student** | `rahul` | `student123` | `1MS21CS001` | Student with active loan (overdue demo loan with fine) |
-| **Student** | `ananya` | `student123` | `1MS21CS002` | Student with active loan within due date |
-| **Student** | `vikram` | `student123` | `1MS21CS003` | Student with clean loan history |
+| Role          | Username    | Password       | Linked USN   | Description                                            |
+| ------------- | ----------- | -------------- | ------------ | ------------------------------------------------------ |
+| **Librarian** | `librarian` | `librarian123` | _N/A_        | Head Librarian with complete administrative privileges |
+| **Student**   | `rahul`     | `student123`   | `1MS21CS001` | Student with active loan (overdue demo loan with fine) |
+| **Student**   | `ananya`    | `student123`   | `1MS21CS002` | Student with active loan within due date               |
+| **Student**   | `vikram`    | `student123`   | `1MS21CS003` | Student with clean loan history                        |
 
 ---
 
 ## Getting Started
 
 ### Prerequisites
+
 - **Java Development Kit (JDK)**: Version 17 or higher
 - **Node.js**: Version 18 or higher & `npm`
 - **MySQL Server**: Version 8.0 or higher
 - **Apache Maven**: Version 3.8 or higher
 
 ### 1. Database Setup
+
 Ensure your MySQL server is running, and create the database:
+
 ```sql
 CREATE DATABASE IF NOT EXISTS LibraryDB;
 ```
@@ -413,19 +430,23 @@ CREATE DATABASE IF NOT EXISTS LibraryDB;
 ### 2. Run in Development Mode
 
 #### Terminal 1 — Start Backend Server:
+
 ```bash
 # In project root:
 mvn spring-boot:run
 ```
+
 The backend starts at `http://localhost:8080`.
 
 #### Terminal 2 — Start Frontend React Server:
+
 ```bash
 # In frontend directory:
 cd frontend
 npm install
 npm run dev
 ```
+
 The Vite development server will start at `http://localhost:5173`. API calls are automatically proxied to `http://localhost:8080`.
 
 ---
@@ -444,7 +465,9 @@ cd ..
 mvn clean package -DskipTests
 java -jar target/library-management-system-0.0.1-SNAPSHOT.jar
 ```
+
 Now access the full application directly at:
+
 ```text
 http://localhost:8080
 ```
@@ -460,6 +483,7 @@ mvn test
 ```
 
 ### Test Coverage Highlights:
+
 - **`TransactionServiceTest`**: Validates borrowing quota (3-book limit), duplicate unreturned loan rejection, stock decrement, 15-day return processing, and overdue fine calculations.
 - **`BookServiceTest`**: Validates book creation, duplicate title constraints, availability checking, and stock status categorization.
 - **`AuthControllerTest`**: Validates JWT authentication and invalid credential rejections.
