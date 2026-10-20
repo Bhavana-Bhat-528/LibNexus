@@ -16,6 +16,66 @@ The platform provides complete role-based workflows for both **Librarians** and 
 
 ---
 
+## 📸 Application Screenshots & UI Showcase
+
+> 💡 **Adding Your Screenshots:** Save your screen captures in the [`docs/screenshots/`](docs/screenshots/) directory matching the filenames below. The markdown embeds below are already linked and will display them automatically!
+
+### 🧑‍💼 Librarian Administration Suite
+
+#### 1. Librarian Overview & Analytics Dashboard
+*Real-time KPI metrics, circulation audit stream, and library inventory distribution.*
+![Librarian Overview Dashboard](docs/screenshots/librarian_dashboard.png)
+
+#### 2. Penalty Fees Collection Ledger
+*Audit record of realized overdue fine revenue, transaction incident breakdowns, live filter tabs, and CSV ledger export.*
+![Penalty Fees Collection Ledger](docs/screenshots/penalties_ledger.png)
+
+#### 3. Register Student & Account Creation
+*Instant student enrollment, auto-generated secure passwords, credential clipboard copy, and comprehensive student account policy reference.*
+![Register Student & Give Password](docs/screenshots/register_student.png)
+
+#### 4. Student Credentials & Passwords Registry
+*Librarian master directory of student usernames, USNs, and one-click password reset facility.*
+![Student Credentials & Passwords](docs/screenshots/student_credentials.png)
+
+#### 5. Books Catalog & Inventory Stock Control
+*Searchable book collection, stock status badges (In Stock, Low Stock, Out of Stock), and book creation/edit modals.*
+![Books Catalog & Stock](docs/screenshots/books_catalog.png)
+
+#### 6. Circulation Transaction Audits
+*Complete chronological audit log of all book issues, returns, active loans, and settled late fees.*
+![Transaction Audits](docs/screenshots/circulation_audits.png)
+
+---
+
+### 🎓 Student Self-Service Portal
+
+#### 1. Student Overview & Quota Dashboard
+*Personal borrowing quota counter (3-book limit), active loans summary, and quick access navigation cards.*
+![Student Dashboard](docs/screenshots/student_dashboard.png)
+
+#### 2. Browse Catalog & Instant Book Borrowing
+*Interactive book catalog displaying real-time availability with single-click book issue.*
+![Student Borrow Book](docs/screenshots/student_borrow.png)
+
+#### 3. My Borrowed Books & Due Date Countdown
+*Active loan monitoring with loan duration countdowns, live overdue fine accrued counters, and return check-in.*
+![My Borrowed Books](docs/screenshots/student_my_books.png)
+
+#### 4. Penalty Fees & Transaction History
+*Transparent breakdown of paid and accruing late return fees with full borrowing history logs.*
+![Student Penalty Statement](docs/screenshots/student_penalties.png)
+
+---
+
+### 🔐 Authentication & Access Control
+
+#### Split-Screen Sign In & Student Self-Registration
+*Stateless JWT login with role detection, new student self-registration modal, and instant one-click demo credentials.*
+![Login & Portal Authentication](docs/screenshots/login_screen.png)
+
+---
+
 ## Architecture Overview
 
 ```mermaid
