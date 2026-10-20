@@ -181,11 +181,14 @@ export const LibrarianDashboard = () => {
                       stats.recentTransactions.map((tx) => (
                         <tr key={tx.id}>
                           <td className="ps-3">
-                            <div className="fw-semibold text-dark">{tx.studentName}</div>
-                            <small className="text-muted font-monospace">{tx.studentUsn}</small>
+                            <div className="fw-semibold text-dark">{tx.student?.name || tx.studentName || 'Student'}</div>
+                            <small className="text-muted font-monospace">{tx.student?.usn || tx.studentUsn || '—'}</small>
                           </td>
                           <td>
-                            <div className="fw-medium text-dark">{tx.bookTitle}</div>
+                            <div className="fw-medium text-dark">{tx.book?.title || tx.bookTitle || 'Untitled Book'}</div>
+                            {tx.book?.category && (
+                              <span className="badge bg-light text-secondary border fs-8 mt-1">{tx.book.category}</span>
+                            )}
                           </td>
                           <td>
                             <span className="text-muted fs-8">{tx.issueDate}</span>

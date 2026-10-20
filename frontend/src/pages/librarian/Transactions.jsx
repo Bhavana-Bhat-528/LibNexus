@@ -141,12 +141,12 @@ export const LibrarianTransactions = () => {
                     <tr key={tx.id}>
                       <td className="ps-3 fw-bold text-secondary font-outfit">#TX-{tx.id}</td>
                       <td>
-                        <div className="fw-bold text-dark">{tx.student.name}</div>
+                        <div className="fw-bold text-dark">{tx.student?.name || tx.studentName || 'Student'}</div>
                       </td>
                       <td>
-                        <span className="badge bg-light text-dark border font-outfit">{tx.student.usn}</span>
+                        <span className="badge bg-light text-dark border font-outfit">{tx.student?.usn || tx.studentUsn || '—'}</span>
                       </td>
-                      <td className="fw-semibold text-primary">{tx.book.title}</td>
+                      <td className="fw-semibold text-primary">{tx.book?.title || tx.bookTitle || 'Untitled Book'}</td>
                       <td>{tx.issueDate}</td>
                       <td>{tx.returnDate || <span className="text-warning fw-semibold">Pending</span>}</td>
                       <td>
