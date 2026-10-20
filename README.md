@@ -10,7 +10,7 @@
 ![MySQL](https://img.shields.io/badge/MySQL-8.0+-4479A1?style=flat-square&logo=mysql&logoColor=white)
 ![Maven](https://img.shields.io/badge/Apache_Maven-3.8+-C71A36?style=flat-square&logo=apache-maven&logoColor=white)
 
-**LibNexus** is an enterprise-grade, modern Library Management System engineered with **Spring Boot 3**, **Spring Security (stateless JWT + BCrypt)**, **Spring Data JPA**, **MySQL**, and a responsive **React + Vite** single-page application.
+**LibNexus** is a full-stack Library Management System built with **Spring Boot 3**, **Spring Security (stateless JWT + BCrypt)**, **Spring Data JPA**, **MySQL**, and a responsive **React + Vite** single-page application.
 
 The platform provides complete role-based workflows for both **Librarians** and **Students**, enforcing strict security boundaries, student data privacy, inventory concurrency controls, automated overdue fine accounting, and comprehensive circulation management.
 

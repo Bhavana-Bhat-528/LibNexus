@@ -25,6 +25,8 @@ bin/
 
 # Environment and Secrets
 .env
+.env.*
+!.env.example
 *.local
 
 # Node / Vite (Frontend)
@@ -38,3 +40,4 @@ yarn-error.log*
 # OS Files
 .DS_Store
 Thumbs.db
+desktop.ini
